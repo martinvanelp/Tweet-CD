@@ -1,0 +1,281 @@
+---
+title: "Beloning ICT Europees vergeleken"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(eurostat)
+library(dplyr)
+library(ggplot2)
+```
+
+In hoeverre is [een hoog aandeel niet-Nederlanders in "Nederlandse" 
+ICT-projecten](https://www.linkedin.com/feed/update/urn:li:activity:6722381991456731136?commentUrn=urn%3Ali%3Acomment%3A%28activity%3A6722381991456731136%2C6722396235833204736%29&replyUrn=urn%3Ali%3Acomment%3A%28activity%3A6722381991456731136%2C6722426944958423040%29) 
+economisch verklaarbaar? Mijn hypothese is dat
+de ICT-sector voor Nederlandse studenten minder aantrekkelijk is omdat in 
+Nederland verscheidene andere sectoren ook goed belonen. Deze hypothese
+is te verkennen met de nationale rekeningen, de boekhouding van een land.
+
+Achtereenvolgens laat ik zien hoe groot de ICT-sector is in Europees 
+perspectief, hoe ICT-ers in Europa beloond worden en hoe dat zich verhoudt tot 
+de rest van de economie, en met welke bedrijfstakken de ICT, kennelijk, in 
+Nederland concurreert.
+
+```{r data, include=FALSE}
+if (file.exists("na_d1.rds")) {
+    na_d1 <- readRDS("na_d1.rds")
+} else {
+    na_d1  <- get_eurostat("nama_10_a64") %>%
+        filter(na_item == "D1",
+               unit    == "CP_MEUR")
+    # , filter = list(na_item = "D1",
+    #               unit    = "CP_MEUR",
+    #               nace_r2 = nace_filter))
+    
+    saveRDS(na_d1, file = "na_d1.rds")
+}
+
+if (file.exists("na_hrs.rds")) {
+    na_hrs <- readRDS("na_hrs.rds")
+} else {
+    na_hrs <- get_eurostat("nama_10_a64_e") %>%
+        filter(na_item == "EMP_DC",
+               unit    == "THS_HW")
+    # , filter = list(na_item = "EMP_DC",
+    #               unit    = "THS_HW",
+    #               nace_r2 = nace_filter))
+    
+    saveRDS(na_hrs, file = "na_hrs.rds")
+}
+
+na_d1_labeled  <- label_eurostat(na_d1)
+na_hrs_labeled <- label_eurostat(na_hrs)
+```
+
+## Gewerkte uren, Europese ICT-sector
+
+Van het totaal aantal gewerkte uren in de Nederlandse economie in 2018 is 3,8% 
+in de ICT sector gewerkt. Nederland zit daarmee in de bovenste helft van Europa 
+laat onderstaand figuur zien. Voorstelbaar was dat door de veronderstelde 
+onaantrekkelijkheid voor Nederlandse studenten de ICT ook klein zou zijn. 
+Maar de sector is in ieder geval niet klein.
+
+```{r uren_ict, echo=FALSE, warning=FALSE}
+# Calculations 
+relative_hours_total <- full_join(
+    na_hrs_labeled %>% 
+        filter(nace_r2 == "Information and communication") %>%
+        select(geo, time, values),
+    na_hrs_labeled %>% 
+        filter(nace_r2 == "Total - all NACE activities") %>%
+        select(nace_r2, geo, time, values),
+    by = c("geo", "time")) %>%
+    mutate(relative_hours = 
+               values.x / values.y)
+
+# Organise data for plot
+plot_hours_data <- relative_hours_total %>%
+    na.omit() %>%
+    mutate(geo = as.character(geo)) %>%
+    filter(time == "2018-01-01",
+           !grepl("Euro", geo)) %>%
+    mutate(Year = format(time, "%Y"),
+           relative_hours_pc = relative_hours * 100,
+           geo = ifelse(geo == "Germany (until 1990 former territory of the FRG)",
+                        "Germany", geo))
+
+ggplot(plot_hours_data, 
+       aes(x = reorder(geo, relative_hours_pc), 
+           y = relative_hours_pc)) +
+    ggtitle("Aantal gewerkte uren in de ICT in Nederland is relatief hoog",
+            "Elders in Europa is het aantal gewerkte uren in de ICT relatief lager") +
+    theme_minimal() +
+    
+    # Axis
+    theme(axis.title.y = element_blank()) +
+    ylab("Gewerkte uren in de ICT als % van het totaal in de economie (2018)") + 
+    coord_flip() +
+    
+    # Caption
+    labs(caption = "@martinvanelp, Bron: Eurostat (NAMA_10_A64_E)") +
+    
+    # Plot data
+    geom_col(fill = "chartreuse1") +
+    geom_col(data = filter(plot_hours_data, geo == "Netherlands"), fill = "orange")
+```
+
+## Beloning per uur, Europese ICT-sector
+
+De beloning per uur in de ICT in Nederland behoort tot de bovenste helft van
+Europa. Dit blijkt uit onderstaand figuur. Deze beloning per uur ligt op 
+ongeveer 35 euro. Dit is beduidend hoger dan veel andere landen waar de 
+beloning onder de 20 euro per uur ligt. Daar staat tegenover dat van de landen 
+waar meer dan 30 euro wordt betaald, Nederland bij de laagsten hoort.
+
+Afgezet tegen de gemiddelde beloning per uur in de economie blijkt de ICT in
+Nederland relatief laag te belonen ten opzichte van andere sectoren. In de
+meeste Europese landen is de beloning in de ICT relatief gezien hoger dan in de
+rest van de economie. Roemenië en Bulgarije springen er uit. Daar ligt de 
+beloning per uur voor ICT-ers meer dan 2,5 keer zo hoog als het gemiddelde in 
+die economie. De ICT ondervindt in Nederland dus waarschijnlijk veel 
+concurrentie van andere sectoren in de economie, want de gemiddelde beloning in 
+Nederland ligt niet veel lager dan in de ICT.
+
+```{r beloning_ict, echo=FALSE, warning=FALSE}
+# Calculations 
+per_hour <- full_join(na_d1_labeled,
+                      na_hrs_labeled,
+                      by = c("nace_r2", "geo", "time")) %>%
+    na.omit() %>%
+    mutate(compensation_per_hour = ( values.x * 10^6 ) / ( values.y * 10^3 ) )
+
+relative_per_hour_total <- full_join(
+    per_hour %>% 
+        filter(nace_r2 == "Information and communication") %>%
+        select(geo, time, compensation_per_hour),
+    per_hour %>% 
+        filter(nace_r2 == "Total - all NACE activities") %>%
+        select(nace_r2, geo, time, compensation_per_hour),
+    by = c("geo", "time")) %>%
+    mutate(relative_compensation = 
+               compensation_per_hour.x / compensation_per_hour.y)
+
+# Organise data for plot
+plot_compensation_ict_data <- relative_per_hour_total %>%
+    na.omit() %>%
+    filter(time == "2018-01-01",
+           !grepl("Euro", geo)) %>%
+    mutate(Year = format(time, "%Y"),
+           relative_compensation_pc = relative_compensation * 100,
+           geo = ifelse(geo == "Germany (until 1990 former territory of the FRG)",
+                        "Germany", geo))
+
+ggplot(plot_compensation_ict_data, 
+       aes(x = reorder(geo, compensation_per_hour.x), 
+           y = compensation_per_hour.x)) +
+    ggtitle("Compensatie per uur in de ICT is hoog in Nederland",
+            "Van de beter betalende landen (>30 euro per uur) staat Nederland wel weer laag") +
+    theme_minimal() +
+    
+    # Axis
+    theme(axis.title.y = element_blank()) +
+    ylab("Compensatie per uur in de ICT, in euro (2018)") + 
+    coord_flip() +
+    
+    # Caption
+    labs(caption = "@martinvanelp, Bron: Eurostat (NAMA_10_A64; NAMA_10_A64_E)") +
+    
+    # Plot data
+    geom_col(fill = "deepskyblue1") +
+    geom_col(data = filter(plot_compensation_ict_data, geo == "Netherlands"), fill = "orange")
+
+ggplot(plot_compensation_ict_data, 
+       aes(x = reorder(geo, relative_compensation_pc), 
+           y = relative_compensation_pc)) +
+    ggtitle("Beloning in de ICT is relatief laag in Nederland",
+            paste0("Het verschil in beloning per uur in de ICT en het gemiddelde in de economie\n",
+                   "is in Nederland kleiner dan in veel andere Europese landen")) +
+    theme_minimal() +
+    
+    # Axis
+    theme(axis.title.y = element_blank()) +
+    ylab("Compensatie per uur in de ICT als % van het gemiddelde in de economie (2018)") + 
+    coord_flip() +
+    
+    # Caption
+    labs(caption = "@martinvanelp, Bron: Eurostat (NAMA_10_A64; NAMA_10_A64_E)") +
+    
+    # Plot data
+    geom_col(fill = "deepskyblue1") +
+    geom_col(data = filter(plot_compensation_ict_data, geo == "Netherlands"), fill = "orange")
+```
+
+## Beloning per uur, Nederlandse sectoren
+
+Er zijn verschillende sectoren in Nederland die, gemiddeld, beter betalen dan
+de ICT. Dit zijn de sectoren mijnbouw, energie, financiële dienstverlening,
+openbaar bestuur en onderwijs. In de industrie en het onroerend goed is de
+gemiddelde beloning ook niet veel lager.
+
+```{r beloning_nl, echo=FALSE, warning=FALSE}
+relative_per_hour_nl <- full_join(
+    per_hour %>% 
+        select(nace_r2, geo, time, compensation_per_hour),
+    per_hour %>% 
+        filter(nace_r2 == "Total - all NACE activities") %>%
+        select(geo, time, compensation_per_hour),
+    by = c("geo", "time")) %>%
+    mutate(relative_compensation = 
+               compensation_per_hour.x / compensation_per_hour.y)
+
+industries_filter <- filter(na_hrs, nace_r2 %in% LETTERS) %>% 
+    label_eurostat() %>% pull(nace_r2) %>% unique()
+industries_letters <- filter(na_hrs, nace_r2 %in% LETTERS) %>% 
+    pull(nace_r2) %>% unique()
+industries_short_names <- c(
+    "Landbouw",
+    "Mijnbouw",
+    "Industrie",
+    "Energie",
+    "Water en afval",
+    "Bouwnijverheid",
+    "Handel",
+    "Vervoer",
+    "Horeca",
+    "ICT",
+    "Financieel",
+    "Vastgoed",
+    "Advisering",
+    "Lease en ondersteuning",
+    "Overheid",
+    "Onderwijs",
+    "Gezondheidszorg",
+    "Entertainment",
+    "Overige diensten",
+    "Huishoudens",
+    "Internationaal")
+industries_labels <- data.frame(
+    nace_r2 = industries_filter,
+    letters = industries_letters,
+    labels = paste(industries_letters, industries_short_names))
+
+# Organise data for plot
+plot_compensation_nl_data <- relative_per_hour_nl %>%
+    na.omit() %>%
+    filter(nace_r2 %in% industries_filter,
+           geo == "Netherlands",
+           time == "2018-01-01") %>%
+    left_join(industries_labels, by = "nace_r2") %>%
+    mutate(Year = format(time, "%Y"),
+           relative_compensation_pc = relative_compensation * 100)
+
+ggplot(plot_compensation_nl_data, 
+       aes(x = reorder(labels, relative_compensation_pc), 
+           y = relative_compensation_pc)) +
+    ggtitle("Beloning in de Nederlandse ICT is bovengemiddeld",
+            "Gemiddeld betalen Mijnbouw, Energie, Financieel, Overheid en Onderwijs beter") +
+    theme_minimal() +
+    
+    # Axis
+    theme(axis.title.y = element_blank()) +
+    ylab("Compensatie per uur in de ICT als % van het gemiddelde in de economie (2018)") + 
+    coord_flip() +
+    
+    # Caption
+    labs(caption = "@martinvanelp, Bron: Eurostat (NAMA_10_A64; NAMA_10_A64_E)") +
+    
+    # Plot data
+    geom_col(fill = "mediumpurple") +
+    geom_col(data = filter(plot_compensation_nl_data, 
+                           nace_r2 == "Information and communication"), fill = "yellow")
+```
+
+## Conclusie
+
+Het lijkt er op dat de ICT-sector in Nederland, voor het aantrekken van talent, 
+relatief veel concurrentie heeft van andere sectoren in de economie. 
+Uit de nationale rekeningen van Europese landen blijkt dat de gemiddelde 
+beloning in de ICT in absolute zin in  Nederland hoog is, maar vergeleken met 
+het gemiddelde in de economie is de beloning per uur relatief laag.
