@@ -14,14 +14,14 @@ library(ggplot2)
 In hoeverre is [een hoog aandeel niet-Nederlanders in "Nederlandse" 
 ICT-projecten](https://www.linkedin.com/feed/update/urn:li:activity:6722381991456731136?commentUrn=urn%3Ali%3Acomment%3A%28activity%3A6722381991456731136%2C6722396235833204736%29&replyUrn=urn%3Ali%3Acomment%3A%28activity%3A6722381991456731136%2C6722426944958423040%29) 
 economisch verklaarbaar? Mijn hypothese is dat
-de ICT-sector voor Nederlandse studenten minder aantrekkelijk is omdat in 
-Nederland verscheidene andere sectoren ook goed belonen. Deze hypothese
+de ICT-sector voor Nederlandse studenten minder aantrekkelijk is omdat andere 
+sectoren in Nederland ook goed belonen. Deze hypothese
 is te verkennen met de nationale rekeningen, de boekhouding van een land.
 
 Achtereenvolgens laat ik zien hoe groot de ICT-sector is in Europees 
 perspectief, hoe ICT-ers in Europa beloond worden en hoe dat zich verhoudt tot 
-de rest van de economie, en met welke bedrijfstakken de ICT, kennelijk, in 
-Nederland concurreert.
+de rest van de economie. Tot slot volgt met welke bedrijfstakken de ICT, 
+kennelijk, in Nederland concurreert.
 
 ```{r data, include=FALSE}
 if (file.exists("na_d1.rds")) {
@@ -56,11 +56,11 @@ na_hrs_labeled <- label_eurostat(na_hrs)
 
 ## Gewerkte uren, Europese ICT-sector
 
-Van het totaal aantal gewerkte uren in de Nederlandse economie in 2018 is 3,8% 
-in de ICT sector gewerkt. Nederland zit daarmee in de bovenste helft van Europa 
-laat onderstaand figuur zien. Voorstelbaar was dat door de veronderstelde 
-onaantrekkelijkheid voor Nederlandse studenten de ICT ook klein zou zijn. 
-Maar de sector is in ieder geval niet klein.
+In 2018 had de ICT-sector een aandeel van 3,8% in het totaal aantal gewerkte 
+uren in de Nederlandse economie. Nederland zit daarmee in de bovenste helft van 
+Europa laat onderstaand figuur zien. Voor te stellen was dat door de 
+veronderstelde onaantrekkelijkheid voor Nederlandse studenten de ICT-sector 
+klein zou zijn. Maar de sector is dat in ieder geval niet.
 
 ```{r uren_ict, echo=FALSE, warning=FALSE}
 # Calculations 
@@ -90,7 +90,7 @@ ggplot(plot_hours_data,
        aes(x = reorder(geo, relative_hours_pc), 
            y = relative_hours_pc)) +
     ggtitle("Aantal gewerkte uren in de ICT in Nederland is relatief hoog",
-            "Elders in Europa is het aantal gewerkte uren in de ICT relatief lager") +
+            "Elders in Europa is het aantal gewerkte uren in de ICT vaak relatief lager") +
     theme_minimal() +
     
     # Axis
@@ -114,16 +114,7 @@ ongeveer 35 euro. Dit is beduidend hoger dan veel andere landen waar de
 beloning onder de 20 euro per uur ligt. Daar staat tegenover dat van de landen 
 waar meer dan 30 euro wordt betaald, Nederland bij de laagsten hoort.
 
-Afgezet tegen de gemiddelde beloning per uur in de economie blijkt de ICT in
-Nederland relatief laag te belonen ten opzichte van andere sectoren. In de
-meeste Europese landen is de beloning in de ICT relatief gezien hoger dan in de
-rest van de economie. Roemenië en Bulgarije springen er uit. Daar ligt de 
-beloning per uur voor ICT-ers meer dan 2,5 keer zo hoog als het gemiddelde in 
-die economie. De ICT ondervindt in Nederland dus waarschijnlijk veel 
-concurrentie van andere sectoren in de economie, want de gemiddelde beloning in 
-Nederland ligt niet veel lager dan in de ICT.
-
-```{r beloning_ict, echo=FALSE, warning=FALSE}
+```{r beloning_ict1, echo=FALSE, warning=FALSE}
 # Calculations 
 per_hour <- full_join(na_d1_labeled,
                       na_hrs_labeled,
@@ -155,7 +146,7 @@ plot_compensation_ict_data <- relative_per_hour_total %>%
 ggplot(plot_compensation_ict_data, 
        aes(x = reorder(geo, compensation_per_hour.x), 
            y = compensation_per_hour.x)) +
-    ggtitle("Compensatie per uur in de ICT is hoog in Nederland",
+    ggtitle("Beloning per uur in de ICT is hoog in Nederland",
             "Van de beter betalende landen (>30 euro per uur) staat Nederland wel weer laag") +
     theme_minimal() +
     
@@ -170,7 +161,18 @@ ggplot(plot_compensation_ict_data,
     # Plot data
     geom_col(fill = "deepskyblue1") +
     geom_col(data = filter(plot_compensation_ict_data, geo == "Netherlands"), fill = "orange")
+```
 
+Afgezet tegen de gemiddelde beloning per uur in de economie blijkt de ICT in
+Nederland relatief laag te belonen ten opzichte van andere sectoren. In de
+meeste Europese landen is de beloning in de ICT ook relatief hoger dan in de
+rest van de economie. Roemenië en Bulgarije springen er uit. Daar ligt de 
+beloning per uur voor ICT-ers meer dan 2,5 keer zo hoog als het gemiddelde in 
+die economieën. De ICT ondervindt in Nederland dus waarschijnlijk veel 
+concurrentie om talent van andere sectoren. Immers de gemiddelde beloning in 
+Nederland ligt niet veel lager dan in de ICT.
+
+```{r beloning_ict2, echo=FALSE, warning=FALSE}
 ggplot(plot_compensation_ict_data, 
        aes(x = reorder(geo, relative_compensation_pc), 
            y = relative_compensation_pc)) +
@@ -181,7 +183,7 @@ ggplot(plot_compensation_ict_data,
     
     # Axis
     theme(axis.title.y = element_blank()) +
-    ylab("Compensatie per uur in de ICT als % van het gemiddelde in de economie (2018)") + 
+    ylab("Beloning per uur in de ICT als % van het gemiddelde in de economie (2018)") + 
     coord_flip() +
     
     # Caption
@@ -260,7 +262,7 @@ ggplot(plot_compensation_nl_data,
     
     # Axis
     theme(axis.title.y = element_blank()) +
-    ylab("Compensatie per uur in de ICT als % van het gemiddelde in de economie (2018)") + 
+    ylab("Beloning per uur in de ICT als % van het gemiddelde in de economie (2018)") + 
     coord_flip() +
     
     # Caption
@@ -274,8 +276,14 @@ ggplot(plot_compensation_nl_data,
 
 ## Conclusie
 
-Het lijkt er op dat de ICT-sector in Nederland, voor het aantrekken van talent, 
+Het lijkt dat de ICT-sector in Nederland, voor het aantrekken van talent, 
 relatief veel concurrentie heeft van andere sectoren in de economie. 
 Uit de nationale rekeningen van Europese landen blijkt dat de gemiddelde 
 beloning in de ICT in absolute zin in  Nederland hoog is, maar vergeleken met 
 het gemiddelde in de economie is de beloning per uur relatief laag.
+
+Beperkingen van deze analyse zijn dat ik hier alleen naar gemiddelden kijk, en
+alleen mijn eigen hypothese ten aanzien van de beloning heb getest. Er zijn
+ongetwijfeld meer mogelijke redenen, te onderzoeken, voor een hoog aandeel 
+niet-Nederlanders in "Nederlandse" ICT-projecten. 
+Maar de beloning lijkt er dus één van.

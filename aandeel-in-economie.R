@@ -96,7 +96,8 @@ shell(paste("explorer", tempdir()), intern = TRUE)
 # Tekst samenvoegen
 tekst <- strwrap("Het aandeel van de %s in de bruto toegevoegde waarde van
                   de Nederlandse #economie was %s procent in %s. Dit is een %s
-                  ten opzichte van 1995, toen dit aandeel nog %s procent was.
+                  ten opzichte van 1995, toen dit aandeel nog %s procent was. 
+                  https://www.cbs.nl/nl-nl/economie/macro-economie 
                   #nationalerekeningen", 
                  width = 280)
 

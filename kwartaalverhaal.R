@@ -9,7 +9,8 @@ library(tidyr)
 library(ggplot2)
 
 # Flash of regulier?
-welke_raming <- tolower(readline(prompt="Flash (f) of Regulier (r)? "))
+welke_raming <- tolower(
+    invisible(readline(prompt = "Flash (f) of Regulier (r)? ")))
 
 # Hoofdtekst
 hoofdtekst <- strwrap("Volgens de %s berekening van het @statistiekcbs
