@@ -60,7 +60,7 @@ In 2018 had de ICT-sector een aandeel van 3,8% in het totaal aantal gewerkte
 uren in de Nederlandse economie. Nederland zit daarmee in de bovenste helft van 
 Europa laat onderstaand figuur zien. Voor te stellen was dat door de 
 veronderstelde onaantrekkelijkheid voor Nederlandse studenten de ICT-sector 
-klein zou zijn. Maar de sector is dat in ieder geval niet.
+klein zou zijn. Maar dat is de sector in ieder geval niet.
 
 ```{r uren_ict, echo=FALSE, warning=FALSE}
 # Calculations 
