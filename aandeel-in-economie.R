@@ -7,6 +7,8 @@ library(cbsodataR)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+library(grid)
+library(gridExtra)
 
 # Statline
 statline_meta <- cbs_get_meta("84105NED")
@@ -60,15 +62,15 @@ plot_titel <- strwrap(
            aandeel_nu, "% in ", staart_periode),
     width = 60) %>% paste0(collapse = "\n")
 
-p <- ggplot(plot_data,
+# Linker figuur (area plot)
+p1 <- ggplot(plot_data,
             aes(Perioden_Date, value, fill = name)) +
-    ggtitle(plot_titel) +
     theme_minimal() +
     
     # Assen instellen
     xlab("") +
     ylab("%") + 
-    scale_x_date(date_breaks = "2 year",
+    scale_x_date(date_breaks = "4 year",
                  labels = function(x) format(as.Date(x), "%Y")) +
     
     # Legenda
@@ -80,11 +82,53 @@ p <- ggplot(plot_data,
                    naam_bedrijfstak)) +
     theme(legend.position = "bottom") +
     
-    # Caption
-    labs(caption = "@martinvanelp, Bron: CBS Statline") +
-    
     # Data plotten
     geom_area()
+
+# Rechter figuur (line plot)
+p2 <- ggplot(plot_data %>% filter(name == "Aandeel_Bedrijfstak"),
+             aes(Perioden_Date, value, color = name)) +
+    theme_minimal() +
+    
+    # Assen instellen
+    xlab("") +
+    ylab("%") + 
+    scale_x_date(date_breaks = "4 year",
+                 labels = function(x) format(as.Date(x), "%Y")) +
+    
+    # Legenda
+    scale_color_manual(
+        name = "",
+        values = c("orange"),
+        labels = c(naam_bedrijfstak)) +
+    theme(legend.position = "bottom") +
+    
+    # Data plotten
+    geom_line(size = 1.5) +
+    geom_point(shape = 21,
+               stroke = 2,
+               size = 2,
+               fill = "white")
+
+# Figuren samenvoegen
+p <- grid.arrange(
+    # Naast elkaar
+    p1, p2, 
+    nrow = 1,
+    # Titel
+    top = textGrob(
+        plot_titel,
+        gp = gpar(fontface = 1, fontsize = 15),
+        hjust = 0,
+        x = 0.05
+    ),
+    # Caption                    
+    bottom = textGrob(
+        "@martinvanelp, Bron: CBS Statline",
+        gp = gpar(fontface = 3, fontsize = 9),
+        hjust = 1,
+        x = 1
+    ))
 
 ggsave(filename = tempfile(fileext = ".png"), 
        plot = p,
