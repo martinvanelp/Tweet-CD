@@ -17,7 +17,8 @@ hoofdtekst <- strwrap("Volgens de %s berekening van het @statistiekcbs
                        is de bruto toegevoegde waarde van de Commerciële 
                        #dienstverlening in het %s met %s procent %s ten 
                        opzichte van het %s. Ten opzichte van een jaar 
-                       eerder was de %s %s procent.", width = 280)
+                       eerder was de %s %s procent. #nationalerekeningen", 
+                      width = 280)
 
 welke_raming_tekst <- switch(welke_raming, f = "eerste", r = "tweede")
 

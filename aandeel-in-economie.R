@@ -60,7 +60,7 @@ plot_titel <- strwrap(
     paste0("Aandeel ", naam_bedrijfstak, " in de economie ", 
            aandeel_richting1," van ", aandeel_1995, "% in 1995 naar ",
            aandeel_nu, "% in ", staart_periode),
-    width = 60) %>% paste0(collapse = "\n")
+    width = 50) %>% paste0(collapse = "\n")
 
 # Linker figuur (area plot)
 p1 <- ggplot(plot_data,
@@ -104,10 +104,10 @@ p2 <- ggplot(plot_data %>% filter(name == "Aandeel_Bedrijfstak"),
     theme(legend.position = "bottom") +
     
     # Data plotten
-    geom_line(size = 1.5) +
+    geom_line(size = 1.2) +
     geom_point(shape = 21,
-               stroke = 2,
-               size = 2,
+               stroke = 1.5,
+               size = 1.5,
                fill = "white")
 
 # Figuren samenvoegen
