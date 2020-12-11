@@ -39,8 +39,10 @@ komma <- function(x) format(x, decimal.mark = ",")
 aandeel_nu <- komma(tail(round(data_bedrijfstak$Aandeel * 100, 1), 1))
 aandeel_1995 <- komma(round(data_bedrijfstak$Aandeel[1] * 100, 1))
 
-aandeel_richting1 <- ifelse(aandeel_nu > aandeel_1995, "groeide", "kromp")
-aandeel_richting2 <- ifelse(aandeel_nu > aandeel_1995, "groei", "krimp")
+aandeel_richting1 <- ifelse(tail(data_bedrijfstak$Aandeel, 1) > 
+                                data_bedrijfstak$Aandeel[1], "groeide", "kromp")
+aandeel_richting2 <- ifelse(tail(data_bedrijfstak$Aandeel, 1) > 
+                                data_bedrijfstak$Aandeel[1], "groei", "krimp")
 
 naam_bedrijfstak <- statline_meta$DataProperties$Title[welke_bedrijfstak]
 
@@ -77,9 +79,10 @@ p1 <- ggplot(plot_data,
     scale_fill_manual(
         name = "",
         values = c("grey", "orange"),
-        labels = c(paste0("Bruto toegevoegde waarde basisprijzen,\n",
-                          "rest van de economie"),
-                   naam_bedrijfstak)) +
+        labels = c(paste0("Bruto toegevoegde waarde\n",
+                          "basisprijzen, rest economie"),
+                   strwrap(naam_bedrijfstak, 
+                           width = 20) %>% paste0(collapse = "\n"))) +
     theme(legend.position = "bottom") +
     
     # Data plotten
@@ -100,7 +103,8 @@ p2 <- ggplot(plot_data %>% filter(name == "Aandeel_Bedrijfstak"),
     scale_color_manual(
         name = "",
         values = c("orange"),
-        labels = c(naam_bedrijfstak)) +
+        labels = c(strwrap(naam_bedrijfstak, 
+                           width = 20) %>% paste0(collapse = "\n"))) +
     theme(legend.position = "bottom") +
     
     # Data plotten
