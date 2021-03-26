@@ -20,7 +20,7 @@ hoofdtekst <- strwrap("Volgens de %s berekening van het @statistiekcbs
                        eerder was de %s %s procent. #nationalerekeningen", 
                       width = 280)
 
-welke_raming_tekst <- switch(welke_raming, f = "eerste", r = "tweede")
+welke_raming_tekst <- switch(welke_raming, f = "1e", r = "2e")
 
 # Statline
 statline_meta <- cbs_get_meta("84106NED")
@@ -68,9 +68,9 @@ plot_joj <- subset(data_bewerkt, SoortMutaties == "A045299") %>%
                    "Totaal_39"))
 
 plot_titel <- paste0("Commerciële dienstverlening ",
-                    joj_richting2, " met ", joj_percentage, " procent\n",
-                    "in het ", huidig_kwartaal, 
-                    " vergeleken met een jaar eerder")
+                     joj_richting2, " met ", joj_percentage, " procent\n",
+                     "in het ", huidig_kwartaal, 
+                     " vergeleken met een jaar eerder")
 
 p <- ggplot(plot_joj,
             aes(Perioden_Date, value, fill = name)) +
