@@ -46,7 +46,7 @@ aandeel_richting2 <- ifelse(tail(data_aggregaat$Aandeel, 1) >
 
 naam_aggregaat <- statline_meta$DataProperties$Title[welk_aggregaat]
 
-if(naam_aggregaat == "Totaal") {
+if(naam_aggregaat %in% c("Totaal", "Saldo")) {
     naam_aggregaat <- statline_meta$DataProperties$Title[welk_aggregaat-1]
 }
 
